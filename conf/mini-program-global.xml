@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<global>
+    <hbase>
+        <hbase.zookeeper.quorum>master</hbase.zookeeper.quorum>
+        <hbase.zookeeper.property.clientPort>2181</hbase.zookeeper.property.clientPort>
+        <zookeeper.znode.parent>/hbase</zookeeper.znode.parent>
+    </hbase>
+    <kafka>
+        <bootstrap.servers>master:9092</bootstrap.servers>
+        <topic>test</topic>
+        <producer>
+            <acks>all</acks>
+            <retries>0</retries>
+            <batch.size>16384</batch.size>
+            <buffer.memory>33554432</buffer.memory>
+            <key.serializer>org.apache.kafka.common.serialization.StringSerializer</key.serializer>
+            <value.serializer>org.apache.kafka.common.serialization.StringSerializer</value.serializer>
+        </producer>
+        <consumer>
+            <group.id>testtest</group.id>
+            <enable.auto.commit>true</enable.auto.commit>
+            <auto.offset.reset>earliest</auto.offset.reset>
+            <auto.commit.interval.ms>1000</auto.commit.interval.ms>
+            <session.timeout.ms>30000</session.timeout.ms>
+            <key.deserializer>org.apache.kafka.common.serialization.StringDeserializer</key.deserializer>
+            <value.deserializer>org.apache.kafka.common.serialization.StringDeserializer</value.deserializer>
+        </consumer>
+    </kafka>
+
+    <mysql>
+        <mini-program>
+            <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+            <jdbc.url>jdbc:mysql://192.168.10.21/bigdata_center?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true</jdbc.url>
+            <jdbc.username>bigdata_admin</jdbc.username>
+            <jdbc.password>bigdata_admin@dev.com</jdbc.password>
+        </mini-program>
+    </mysql>
+
+</global>
