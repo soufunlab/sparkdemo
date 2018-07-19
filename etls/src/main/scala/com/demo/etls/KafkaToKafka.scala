@@ -14,7 +14,7 @@ import scala.collection.mutable
   * Hello world!
   *
   */
-object App {
+object KafkaToKafka {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("KafkaDirectStream").setMaster("local[1]")
     val ssc = new StreamingContext(conf, Seconds(Config.timeInterval.toInt))
