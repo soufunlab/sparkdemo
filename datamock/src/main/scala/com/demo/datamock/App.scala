@@ -1,6 +1,6 @@
 package com.demo.datamock
 
-import java.io.FileWriter
+import java.io.{File, FileWriter}
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -21,8 +21,8 @@ object App {
 
     for (i <- 1 to Int.MaxValue) {
       var count = 0
-      //    val out = new FileWriter("%s.txt".format(i), true)
-      val out = new FileWriter("/home/datamock/wechat/%s.txt".format(i), true)
+      val path = "/home/datamock/wechat/%s.COMPLETED".format(i)
+      val out = new FileWriter(path, true)
       try {
         println("start mock i:" + i)
         while (count < 5000) {
@@ -36,6 +36,9 @@ object App {
         }
       } finally {
         out.close()
+        val file1 = new File(path)
+        var file2 = new File(path.replace("COMPLETED", "txt"))
+        file1.renameTo(file2)
       }
       Thread.sleep(60 * 1000);
     }

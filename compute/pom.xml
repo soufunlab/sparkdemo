@@ -17,23 +17,6 @@
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>com.cloudyoung.bigdata</groupId>
-            <artifactId>cloudyoung-mini-program-common</artifactId>
-            <version>0.0.1</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-high-level-client</artifactId>
-            <version>6.2.4</version>
-        </dependency>
 
     </dependencies>
 
@@ -60,31 +43,11 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <!--<addClasspath>true</addClasspath>-->
-                            <!--<classpathPrefix>lib/</classpathPrefix>-->
-                            <mainClass>com.cloudyoung.bigdata.miniprogram.statistics.main.Main</mainClass>
+                            <mainClass>com.demo.compute.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-dependency-plugin</artifactId>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>copy</id>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>copy-dependencies</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--<outputDirectory>-->
-            <!--${project.build.directory}/lib-->
-            <!--</outputDirectory>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -121,6 +84,16 @@
                 </executions>
             </plugin>
         </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
 
     </build>
 

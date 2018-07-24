@@ -5,7 +5,7 @@ import java.util
 
 import kafka.serializer.StringDecoder
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.fs.{FSDataOutputStream, FileSystem, Path}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.{Seconds, StreamingContext}
@@ -19,13 +19,14 @@ import org.apache.spark.streaming.kafka.KafkaUtils
   */
 object KafkaToHdfs {
   def main(args: Array[String]): Unit = {
-    val conf = new SparkConf().setAppName("KafkaDirectStream").setMaster("local[1]")
+    val conf = new SparkConf().setAppName("KafkaDirectStream")
+//      .setMaster("local[1]")
     val ssc = new StreamingContext(conf, Seconds(Config.timeInterval.toInt))
     val kafkaParams = Map(
       "zookeeper.connect" -> Config.zkQuorum,
       "group.id" -> Config.groupId,
       "metadata.broker.list" -> Config.brokerList,
-      "auto.offset.reset" -> "smallest")
+      "auto.offset.reset" -> "largest")
     val topics = Set(Config.topic)
 
     val directKafkaStream = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, topics)
@@ -34,25 +35,30 @@ object KafkaToHdfs {
     val fs = FileSystem.get(new URI("hdfs://master:8020/"), config);
     var output = "test"
 
-    var i=0
+    var i = 0
     directKafkaStream.foreachRDD(rdd => {
       if (!rdd.isEmpty()) {
-        print(i=i+1)
+        print(i = i + 1)
         val path = hdfsPath;
         val pathUrl = path.toUri
 
+        var outputStream: FSDataOutputStream = null
         if (!fs.exists(path)) {
-          fs.create(path)
+          outputStream = fs.create(path)
+        } else {
+          outputStream = fs.append(path);
         }
 
-        rdd.foreachPartition(it => {
-          val configP = new Configuration()
-          val fsP = FileSystem.get(new URI("hdfs://master:8020/"), configP);
-          val fin = fsP.append(new Path(pathUrl))
-          for (v <- it) {
-            fin.writeUTF(v._2 + "\n")
-          }
-        })
+        try {
+          var count = rdd.filter(item => item._2.split("∫").length == 8)
+            .count();
+          println(count)
+          rdd.filter(item => item._2.split("∫").length == 8)
+            .collect().foreach(item => outputStream.writeUTF(item._2 + "\n"))
+        }
+        finally {
+          outputStream.close()
+        }
       }
     })
 
