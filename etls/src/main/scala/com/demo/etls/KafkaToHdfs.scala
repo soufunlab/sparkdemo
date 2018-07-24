@@ -34,8 +34,10 @@ object KafkaToHdfs {
     val fs = FileSystem.get(new URI("hdfs://master:8020/"), config);
     var output = "test"
 
+    var i=0
     directKafkaStream.foreachRDD(rdd => {
       if (!rdd.isEmpty()) {
+        print(i=i+1)
         val path = hdfsPath;
         val pathUrl = path.toUri
 

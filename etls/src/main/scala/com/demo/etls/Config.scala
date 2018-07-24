@@ -12,8 +12,8 @@ import java.util.Properties
 object Config extends Serializable {
 
   val props = new Properties()
-  val path = Thread.currentThread().getContextClassLoader.getResource("config.properties").getPath
-  props.load(new FileInputStream(path))
+//  val path = Thread.currentThread().getContextClassLoader.getResource("config.properties").getPath
+  props.load(new FileInputStream("config.properties"))
 
   val timeInterval = get("timeInterval")
   val brokerList = get("brokerList")

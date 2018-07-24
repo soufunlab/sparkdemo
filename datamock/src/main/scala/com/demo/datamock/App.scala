@@ -25,7 +25,7 @@ object App {
       val out = new FileWriter("/home/datamock/wechat/%s.txt".format(i), true)
       try {
         println("start mock i:" + i)
-        while (count < 50000) {
+        while (count < 5000) {
           //time openid traceid sourceurl pageurl staytime province city
           val city = getcity
           val value = "%s∫%s∫%s∫%s∫%s∫%s∫%s∫%s"
