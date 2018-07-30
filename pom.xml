@@ -9,8 +9,7 @@
     <packaging>pom</packaging>
     <version>0.0.1</version>
     <modules>
-        <module>cloudyoung-mini-program-statistics</module>
-        <module>cloudyoung-mini-program-common</module>
+        <module>compute</module>
         <module>datamock</module>
         <module>etls</module>
     </modules>
@@ -59,7 +58,7 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-hive_2.10</artifactId>
             <version>${spark.version}</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
 
         <dependency>
@@ -116,7 +115,7 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming_2.10</artifactId>
             <version>${spark.version}</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

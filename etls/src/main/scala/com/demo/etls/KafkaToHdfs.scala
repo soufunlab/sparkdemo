@@ -50,11 +50,14 @@ object KafkaToHdfs {
         }
 
         try {
-          var count = rdd.filter(item => item._2.split("∫").length == 8)
+          var count = rdd.filter(item => item._2.split("\t").length == 8)
             .count();
           println(count)
-          rdd.filter(item => item._2.split("∫").length == 8)
-            .collect().foreach(item => outputStream.writeUTF(item._2 + "\n"))
+          rdd.filter(item => item._2.split("\t").length == 8)
+            .collect().foreach(item => {
+            val line = item._2 + "\n"
+            outputStream.write(line.getBytes, 0, line.getBytes.length)
+          })
         }
         finally {
           outputStream.close()

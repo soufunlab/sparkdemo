@@ -36,7 +36,7 @@ object KafkaToKafka {
           "org.apache.kafka.common.serialization.StringSerializer")
 
         val producer = new KafkaProducer[String, String](props)
-        partition.filter(item => item._2.split("∫").length == 8).foreach(item => {
+        partition.filter(item => item._2.split("\t").length == 8).foreach(item => {
           val message = new ProducerRecord[String, String](Config.produceTopic, null, item._2)
           producer.send(message)
         })

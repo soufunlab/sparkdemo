@@ -43,7 +43,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.demo.compute.App</mainClass>
+                            <mainClass>com.demo.compute.UV</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

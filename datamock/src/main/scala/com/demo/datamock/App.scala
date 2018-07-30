@@ -28,7 +28,7 @@ object App {
         while (count < 5000) {
           //time openid traceid sourceurl pageurl staytime province city
           val city = getcity
-          val value = "%s∫%s∫%s∫%s∫%s∫%s∫%s∫%s"
+          val value = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
             .format(nowdate, openid, traceid, pageurl, pageurl, staytime, city.split(",")(0), city.split(",")(1))
 
           out.write(value + System.getProperty("line.separator"))
