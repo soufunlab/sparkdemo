@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>cloudyoung-mini-program-statistics</artifactId>
+    <artifactId>compute</artifactId>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -43,7 +43,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.demo.compute.UV</mainClass>
+                            <mainClass>com.demo.compute.UV_day</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
