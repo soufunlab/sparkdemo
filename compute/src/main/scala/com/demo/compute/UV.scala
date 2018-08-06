@@ -1,11 +1,14 @@
 package com.demo.compute
 
+import java.net.URI
 import java.sql
 import java.sql.{Connection, Date, DriverManager, PreparedStatement}
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
 
 import com.demo.compute.UV.dateFormat
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.{Partition, SparkConf, SparkContext, TaskContext}
 import org.apache.spark.rdd.RDD
 
@@ -26,19 +29,21 @@ object UV {
     val sqlTime = new java.sql.Date(uvTime(0).getTime)
 
     val conf = new SparkConf().setAppName(tableName)
-//      .setMaster("local[1]")
+    //         .setMaster("local[1]")
     val sc = new SparkContext(conf)
 
     var filesPath = mutable.MutableList[String]()
+
+    val config = new Configuration()
+    val fs = FileSystem.get(new URI("hdfs://master:8020/"), config);
     for (time <- uvTime) {
-      filesPath += "hdfs://master:8020/user/root/test/%s/%s.txt".format(path(time), path(time))
+      val hdfsPath = "hdfs://master:8020/user/root/test/%s/%s.txt".format(path(time), path(time))
+      if (fs.exists(new Path(hdfsPath)))
+        filesPath += "hdfs://master:8020/user/root/test/%s/%s.txt".format(path(time), path(time))
     }
+
     val inputRdd = sc.textFile(filesPath.mkString(","))
-
-        val allUv = inputRdd.map(_.split("\t")(1)).distinct().count()
-
-//    val allUv = 1000
-//    val cityUv = mutable.Map("北京" -> 100L, "南京" -> 100L)
+    val allUv = inputRdd.map(_.split("\t")(1)).distinct().count()
 
     val cityUv = inputRdd.map(_.split("\t"))
       .map(i => (i(7) + "," + i(1), ""))
@@ -48,7 +53,9 @@ object UV {
       .map(i => (i(6) + "," + i(1), ""))
       .reduceByKey(_ + _).map(i => i._1.split(",")(0)).countByValue()
 
-//    val provinceUv = mutable.Map("江苏" -> 100L, "河北" -> 100L)
+    //    val allUv = 1000
+    //    val cityUv = mutable.Map("北京" -> 100L, "南京" -> 100L)
+    //    val provinceUv = mutable.Map("江苏" -> 100L, "河北" -> 100L)
 
     var conn: Connection = null
     var ps: PreparedStatement = null
