@@ -27,9 +27,9 @@ object UV {
   def main(args: Array[String]): Unit = {
     val uvTime = setUvTime(args: _*)
     val sqlTime = new java.sql.Date(uvTime(0).getTime)
-
+//    println(sqlTime)
     val conf = new SparkConf().setAppName(tableName)
-    //         .setMaster("local[1]")
+    //             .setMaster("local[1]")
     val sc = new SparkContext(conf)
 
     var filesPath = mutable.MutableList[String]()
@@ -41,6 +41,7 @@ object UV {
       if (fs.exists(new Path(hdfsPath)))
         filesPath += "hdfs://master:8020/user/root/test/%s/%s.txt".format(path(time), path(time))
     }
+//    uvTime.foreach(println(_))
 
     val inputRdd = sc.textFile(filesPath.mkString(","))
     val allUv = inputRdd.map(_.split("\t")(1)).distinct().count()
@@ -61,9 +62,10 @@ object UV {
     var ps: PreparedStatement = null
     val sql = "insert into %s(action_time,province,city,count) values (?,?,?,?) ".format(tableName)
     try {
-      conn = DriverManager.getConnection("jdbc:mysql://master:3306/compute?characterEncoding=utf8", "lihao", "123")
+      conn = DriverManager.getConnection("jdbc:mysql://master:3306/compute?characterEncoding=utf8&serverTimezone=Asia/Shanghai", "lihao", "123")
 
       {
+        println(sqlTime)
         ps = conn.prepareStatement(sql)
         ps.setDate(1, sqlTime)
         ps.setString(2, "")
@@ -112,6 +114,7 @@ object UV {
           list += (dateFormat.parse(args(1)))
         } else {
           var c = Calendar.getInstance
+//          println(c.getTime)
           c.add(Calendar.DATE, -1)
           list += (c.getTime)
         }
