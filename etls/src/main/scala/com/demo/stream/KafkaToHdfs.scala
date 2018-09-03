@@ -1,4 +1,4 @@
-package com.demo.etls
+package com.demo.stream
 
 import java.net.URI
 import java.util
@@ -20,7 +20,7 @@ import org.apache.spark.streaming.kafka.KafkaUtils
 object KafkaToHdfs {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("KafkaDirectStream")
-//      .setMaster("local[1]")
+    //      .setMaster("local[1]")
     val ssc = new StreamingContext(conf, Seconds(Config.timeInterval.toInt))
     val kafkaParams = Map(
       "zookeeper.connect" -> Config.zkQuorum,
@@ -50,11 +50,9 @@ object KafkaToHdfs {
         }
 
         try {
-          var count = rdd.filter(item => item._2.split("\t").length == 8)
-            .count();
+          var count = rdd.count();
           println(count)
-          rdd.filter(item => item._2.split("\t").length == 8)
-            .collect().foreach(item => {
+          rdd.collect().foreach(item => {
             val line = item._2 + "\n"
             outputStream.write(line.getBytes, 0, line.getBytes.length)
           })
