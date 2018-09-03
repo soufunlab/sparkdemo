@@ -29,7 +29,7 @@ object UV {
     val sqlTime = new java.sql.Date(uvTime(0).getTime)
 //    println(sqlTime)
     val conf = new SparkConf().setAppName(tableName)
-    //             .setMaster("local[1]")
+                .setMaster("yarn-cluster")
     val sc = new SparkContext(conf)
 
     var filesPath = mutable.MutableList[String]()
