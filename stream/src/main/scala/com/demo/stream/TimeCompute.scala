@@ -57,12 +57,16 @@ object TimeCompute {
     * 新增用户
     */
   def newAdd(rdd: RDD[(String, String)], hour: String): Unit = {
-    rdd.map(i => i._2).map(i => i.split("\t")).map { i =>
+    val prdd = rdd.map(i => i._2).map(i => i.split("\t")).map { i =>
       i match {
         case Entity(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
         => Entity(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
       }
-    }.filter(e => e.event == event_register)
+    }.filter(e => e.event == event_register).persist();
+
+    //新增用户数进hbase
+    //新增用户进当日新增用户表
+    //新增用户进总用户表
   }
 
   def getHour() = {
