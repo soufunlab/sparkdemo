@@ -1,4 +1,4 @@
-package com.demo.stream
+package com.demo.spstream
 
 import java.net.URI
 import java.text.SimpleDateFormat
@@ -10,6 +10,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FSDataOutputStream, FileSystem, Path}
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.hbase.client.{ConnectionFactory, HTable, Put}
+import org.apache.hadoop.hbase.mapred.TableOutputFormat
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.mapred.JobConf
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
@@ -17,6 +18,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.kafka.KafkaUtils
+
 import scala.collection.JavaConversions._
 
 /**
@@ -35,7 +37,7 @@ object TimeCompute {
 
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("KafkaDirectStream")
-      .setMaster("local[1]")
+      .setMaster("local[2]")
     val ssc = new StreamingContext(conf, Seconds(Config.timeInterval.toInt))
     val kafkaParams = Map(
       "zookeeper.connect" -> Config.zkQuorum,
@@ -92,23 +94,19 @@ object TimeCompute {
     * @param hour
     */
   def putNewUserDay(prdd: RDD[Entity], hour: String) = {
-    val key_prefix = hour.split(" ")(1);
+    val key_prefix = hour.split(" ")(0);
     prdd.map(e => {
       val put = new Put(Bytes.toBytes(key_prefix + "_" + e.openid))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("p"), Bytes.toBytes(e.province.toString))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("c"), Bytes.toBytes(e.city.toString))
     }).foreachPartition(it => {
-      val hbaseConf = HBaseConfiguration.create()
-      val hbaseConn = ConnectionFactory.createConnection(hbaseConf)
-      val table = hbaseConn.getTable(TableName.valueOf("compute:newuser_hour"))
+      val table = hbaseConn.getTable(TableName.valueOf("compute:newuser_day"))
       table.put(it.toList)
     })
   }
 
   def putNewUserHour(prdd: RDD[Entity], hour: String) = {
     val count = prdd.count()
-    val hbaseConf = HBaseConfiguration.create()
-    val hbaseConn = ConnectionFactory.createConnection(hbaseConf)
     val table = hbaseConn.getTable(TableName.valueOf("compute:newuser_hour"))
     val put = new Put(Bytes.toBytes(hour))
     put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(count.toString))
@@ -121,9 +119,7 @@ object TimeCompute {
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("p"), Bytes.toBytes(e.province.toString))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("c"), Bytes.toBytes(e.city.toString))
     }).foreachPartition(it => {
-      val hbaseConf = HBaseConfiguration.create()
-      val hbaseConn = ConnectionFactory.createConnection(hbaseConf)
-      val table = hbaseConn.getTable(TableName.valueOf("compute:user_all"))
+      val table = hbaseConn.getTable(TableName.valueOf("compute:all_user"))
       table.put(it.toList)
     })
   }
@@ -138,6 +134,14 @@ object TimeCompute {
       calendar.add(Calendar.HOUR, 1)
       simpleDateFormat.format(calendar.getTime)
     }
+  }
+
+  def hbaseConn = {
+    val hbaseConf = new JobConf(HBaseConfiguration.create())
+    hbaseConf.set("hbase.zookeeper.quorum", Config.zkQuorum)
+    hbaseConf.set("zookeeper.znode.parent", "/hbase")
+    hbaseConf.setOutputFormat(classOf[TableOutputFormat])
+    ConnectionFactory.createConnection(hbaseConf)
   }
 
   case class Entity(val time: String, val openid: String, val traceid: String, val sourceurl: String, val pageurl: String, val staytime: String, val province: String, val city: String, val event: String, val device: String, val os: String)

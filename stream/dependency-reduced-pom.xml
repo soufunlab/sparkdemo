@@ -6,7 +6,7 @@
     <version>0.0.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>etls</artifactId>
+  <artifactId>stream</artifactId>
   <build>
     <resources>
       <resource>
@@ -37,7 +37,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.demo.stream.TimeCompute</mainClass>
+              <mainClass>com.demo.spstream.TimeCompute</mainClass>
             </manifest>
           </archive>
         </configuration>

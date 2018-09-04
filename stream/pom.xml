@@ -45,7 +45,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.demo.stream.TimeCompute</mainClass>
+                            <mainClass>com.demo.spstream.TimeCompute</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

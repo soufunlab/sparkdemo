@@ -1,4 +1,4 @@
-package com.demo.stream
+package com.demo.etls
 
 import java.io.FileInputStream
 import java.util.Properties
