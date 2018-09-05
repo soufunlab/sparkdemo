@@ -24,11 +24,15 @@ object Utils {
   val event_error = "error"
 
   def hbaseConn = {
+    ConnectionFactory.createConnection(hbaseConf)
+  }
+
+  def hbaseConf = {
     val hbaseConf = new JobConf(HBaseConfiguration.create())
     hbaseConf.set("hbase.zookeeper.quorum", Config.zkQuorum)
     hbaseConf.set("zookeeper.znode.parent", "/hbase")
     hbaseConf.setOutputFormat(classOf[TableOutputFormat])
-    ConnectionFactory.createConnection(hbaseConf)
+    hbaseConf
   }
 
   def getHour() = {
