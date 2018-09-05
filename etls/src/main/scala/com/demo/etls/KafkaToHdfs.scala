@@ -32,7 +32,7 @@ object KafkaToHdfs {
     val directKafkaStream = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, topics)
 
     val config = new Configuration()
-    val fs = FileSystem.get(new URI("hdfs://master:8020/"), config);
+    val fs = FileSystem.get(new URI("hdfs://slave1:8020/"), config);
     var output = "test"
 
     var i = 0
