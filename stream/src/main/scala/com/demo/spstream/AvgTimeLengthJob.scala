@@ -29,15 +29,9 @@ object AvgTimeLengthJob {
     putAvgTimeHour(jrdd, hour)
   }
 
-  /**
-    * 城市维度统计启动次数
-    *
-    * @param hour
-    */
   def putAvgTimeHour(jrdd: RDD[(String, (String, String))], hour: String) = {
+    var hours = hour.replace(" ", "")
     val allTraceCount = jrdd.count
-    val key_prefix = hour.split(" ")(0);
-
     val timeLength = jrdd.values.mapPartitions(it => {
       val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
       it.map(e => {
@@ -47,20 +41,40 @@ object AvgTimeLengthJob {
       })
     }).reduce(_ + _)
 
-    val meanTimeLength = timeLength / allTraceCount
+    println("timeLength" + timeLength)
+    println("allTraceCount" + allTraceCount)
+
+    val meanTimeLength = allTraceCount match {
+      case 0 => -1
+      case _ => timeLength / allTraceCount
+    }
 
     val userCount = jrdd.keys.map(k => k.split("_")(0)).distinct().count()
-    val avgUserTimeLength = timeLength / userCount
+    val avgUserTimeLength = userCount match {
+      case 0 => -1
+      case _ => timeLength / userCount
+    }
+
+    println("userCount" + userCount)
 
     val mean = Utils.hbaseConn.getTable(TableName.valueOf("compute:mean_time_hour"))
-    val put = new Put(Bytes.toBytes(hour))
-    put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("tl"), Bytes.toBytes(meanTimeLength.toString))
-    mean.put(put)
+    try {
+      val put = new Put(Bytes.toBytes(hours))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("tl"), Bytes.toBytes(meanTimeLength.toString))
+      mean.put(put)
+    } finally {
+      mean.close()
+    }
 
     val avguser = Utils.hbaseConn.getTable(TableName.valueOf("compute:avguser_time_hour"))
-    val avgput = new Put(Bytes.toBytes(hour))
-    avgput.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("tl"), Bytes.toBytes(avgUserTimeLength.toString))
-    avguser.put(avgput)
+    try {
+      val avgput = new Put(Bytes.toBytes(hours))
+      avgput.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("tl"), Bytes.toBytes(avgUserTimeLength.toString))
+      avguser.put(avgput)
+    } finally {
+      avguser.close()
+    }
+
   }
 
 }

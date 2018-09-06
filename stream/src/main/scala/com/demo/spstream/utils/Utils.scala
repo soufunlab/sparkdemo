@@ -22,9 +22,7 @@ object Utils {
   val event_exit = "exit"
   val event_error = "error"
 
-  def hbaseConn = {
-    ConnectionFactory.createConnection(hbaseConf)
-  }
+  val hbaseConn = ConnectionFactory.createConnection(hbaseConf)
 
   def hbaseConf = {
     val hbaseConf = new JobConf(HBaseConfiguration.create())
@@ -36,7 +34,7 @@ object Utils {
 
   def getHour() = {
     val calendar = Calendar.getInstance()
-    var simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH")
+    var simpleDateFormat = new SimpleDateFormat("yyyyMMdd HH")
     val min = calendar.get(Calendar.MINUTE)
     if (min <= 30) {
       simpleDateFormat.format(calendar.getTime)

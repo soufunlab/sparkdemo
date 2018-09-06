@@ -16,13 +16,14 @@ import scala.collection.JavaConversions._
   * @version 1.0 2018-9-5 11:18 by 李浩（lihao@cloud-young.com）创建
   */
 object RegisterJob {
-def execute(rdd: RDD[(String, String)], hour: String): Unit = {
+  def execute(rdd: RDD[(String, String)], hour: String): Unit = {
     val prdd = rdd.map(i => i._2).map(i => i.split("\t")).map { i =>
       i match {
         case Array(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
         => Entity(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
       }
-    }.filter(e => e.event == Utils.event_register).persist();
+    }.filter(e => e.event == Utils.event_register)
+      .map(e => (e.openid, e)).reduceByKey((a, b) => a).map(e => e._2).persist();
 
     /**
       * 新增用户数进小时表
@@ -54,16 +55,25 @@ def execute(rdd: RDD[(String, String)], hour: String): Unit = {
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("c"), Bytes.toBytes(e.city.toString))
     }).foreachPartition(it => {
       val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:newuser_day"))
-      table.put(it.toList)
+      try {
+        table.put(it.toList)
+      } finally {
+        table.close()
+      }
     })
   }
 
   def putNewUserHour(prdd: RDD[Entity], hour: String) = {
+    var hours = hour.replace(" ", "")
     val count = prdd.count()
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:newuser_hour"))
-    val put = new Put(Bytes.toBytes(hour))
+    val put = new Put(Bytes.toBytes(hours))
     put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(count.toString))
-    table.put(put)
+    try {
+      table.put(put)
+    } finally {
+      table.close()
+    }
   }
 
   def putNewUserAll(prdd: RDD[Entity]) = {
@@ -73,7 +83,12 @@ def execute(rdd: RDD[(String, String)], hour: String): Unit = {
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("c"), Bytes.toBytes(e.city.toString))
     }).foreachPartition(it => {
       val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:all_user"))
-      table.put(it.toList)
+      try {
+        table.put(it.toList)
+      } finally {
+        table.close()
+      }
+
     })
   }
 }

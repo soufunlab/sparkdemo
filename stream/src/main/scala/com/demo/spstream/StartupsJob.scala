@@ -37,12 +37,18 @@ object StartupsJob {
     */
   def putStartupsCityDay(prdd: RDD[Entity], hour: String) = {
     val key_prefix = hour.split(" ")(0);
-    prdd.map(e => (e.city, 1)).reduceByKey(_ + _).foreach(e => {
-      val put = new Put(Bytes.toBytes(key_prefix + "_" + e._1))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("p"), Bytes.toBytes(e._2.toString))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("c"), Bytes.toBytes(e._2.toString))
+    prdd.map(e => (e.city, 1)).reduceByKey(_ + _).foreachPartition(it => {
       val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:startups_city_day"))
-      table.put(put)
+      try {
+        it.foreach(e => {
+          val put = new Put(Bytes.toBytes(key_prefix + "_" + e._1))
+          put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("p"), Bytes.toBytes(e._2.toString))
+          put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("c"), Bytes.toBytes(e._2.toString))
+          table.put(put)
+        })
+      }finally {
+        table.close()
+      }
     })
   }
 
@@ -59,7 +65,11 @@ object StartupsJob {
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("p"), Bytes.toBytes(e._2.toString))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("c"), Bytes.toBytes(e._2.toString))
       val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:startups_os_day"))
-      table.put(put)
+      try {
+        table.put(put)
+      } finally {
+        table.close()
+      }
     })
   }
 
@@ -71,11 +81,17 @@ object StartupsJob {
     * @param hour
     */
   def putStartupsHour(prdd: RDD[Entity], hour: String) = {
+    val hours=hour.replace(" ","")
     val count = prdd.count()
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:startups_hour"))
-    val put = new Put(Bytes.toBytes(hour))
-    put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(count.toString))
-    table.put(put)
+    try {
+      val put = new Put(Bytes.toBytes(hours))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(count.toString))
+      table.put(put)
+    } finally {
+      table.close()
+    }
+
   }
 
 }

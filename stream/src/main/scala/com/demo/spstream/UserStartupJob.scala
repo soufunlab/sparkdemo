@@ -22,7 +22,7 @@ object UserStartupJob {
         case Array(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
         => Entity(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
       }
-    }.filter(e => e.event == Utils.event_load).persist();
+    }.filter(e => e.event == Utils.event_load).map(e => (e.openid, (e.province, e.city))).reduceByKey((a, b) => a).persist();
 
     putStartupHour(prdd, hour)
     putStartupDay(prdd, hour)
@@ -35,15 +35,19 @@ object UserStartupJob {
     * @param prdd
     * @param hour
     */
-  def putStartupDay(prdd: RDD[Entity], hour: String) = {
+  def putStartupDay(prdd: RDD[(String, (String, String))], hour: String) = {
     val key_prefix = hour.split(" ")(0);
-    prdd.map(e => (e.openid, (e.province, e.city))).reduceByKey((a, b) => a).map(e => {
+    prdd.map(e => {
       val put = new Put(Bytes.toBytes(key_prefix + "_" + e._1))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("p"), Bytes.toBytes(e._2._1.toString))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("c"), Bytes.toBytes(e._2._1.toString))
     }).foreachPartition(it => {
       val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:userstartup_day"))
-      table.put(it.toList)
+      try {
+        table.put(it.toList)
+      } finally {
+        table.close()
+      }
     })
   }
 
@@ -53,12 +57,17 @@ object UserStartupJob {
     * @param prdd
     * @param hour
     */
-  def putStartupHour(prdd: RDD[Entity], hour: String) = {
-    val count = prdd.map(e => e.openid).count()
+  def putStartupHour(prdd: RDD[(String, (String, String))], hour: String) = {
+    var hours = hour.replace(" ", "")
+    val count = prdd.map(e => e._1).distinct().count()
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:userstartup_hour"))
-    val put = new Put(Bytes.toBytes(hour))
-    put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(count.toString))
-    table.put(put)
+    try {
+      val put = new Put(Bytes.toBytes(hours))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(count.toString))
+      table.put(put)
+    } finally {
+      table.close()
+    }
   }
 
 }

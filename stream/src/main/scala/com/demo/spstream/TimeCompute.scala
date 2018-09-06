@@ -29,8 +29,8 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 object TimeCompute {
 
   def main(args: Array[String]): Unit = {
-    val conf = new SparkConf().setAppName("KafkaDirectStream")
-      .setMaster("local[2]")
+    val conf = new SparkConf().setAppName("time-compute")
+//      .setMaster("local[2]")
     val ssc = new StreamingContext(conf, Seconds(Config.timeInterval.toInt))
     val kafkaParams = Map(
       "zookeeper.connect" -> Config.zkQuorum,

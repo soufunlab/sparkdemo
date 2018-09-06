@@ -20,7 +20,7 @@ import org.apache.spark.streaming.kafka.KafkaUtils
 object KafkaToHdfs {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("KafkaDirectStream")
-//          .setMaster("local[1]")
+    //          .setMaster("local[1]")
     val ssc = new StreamingContext(conf, Seconds(Config.timeInterval.toInt))
     val kafkaParams = Map(
       "zookeeper.connect" -> Config.zkQuorum,
@@ -37,8 +37,11 @@ object KafkaToHdfs {
     config.set("dfs.ha.namenodes.nameservice1", "namenode46,namenode64")
     config.set("dfs.namenode.rpc-address.nameservice1.namenode46", "master:8020")
     config.set("dfs.namenode.rpc-address.nameservice1.namenode64", "slave1:8020")
-    config.set("dfs.client.failover.proxy.provider.nameservice1", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider")
+    //    config.set("dfs.client.failover.proxy.provider.nameservice1", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider")
     config.set("fs.defaultFS", "hdfs://nameservice1")
+    config.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER")
+    config.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true")
+
     val fs = FileSystem.get(new URI("hdfs://nameservice1"), config, "root");
     //    val fs = FileSystem.get(new URI("hdfs://slave1:8020/"), config);
     var output = "test"
