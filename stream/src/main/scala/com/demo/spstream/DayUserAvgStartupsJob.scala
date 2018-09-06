@@ -21,35 +21,36 @@ object DayUserAvgStartupsJob {
   def execute(sc: SparkContext, hour: String): Unit = {
     val allStartupCount = {
       val scan = {
-        var scan = new Scan()
-        scan.setFilter(new PrefixFilter(Bytes.toBytes(hour.split(" ")(0))))
-        val proto = ProtobufUtil.toScan(scan)
+        var scani = new Scan()
+
+        scani.setFilter(new PrefixFilter(Bytes.toBytes(hour.split(" ")(0))))
+        val proto = ProtobufUtil.toScan(scani)
         Base64.encodeBytes(proto.toByteArray)
       }
 
       val conf = Utils.hbaseConf
       conf.set(TableInputFormat.INPUT_TABLE, "compute:startups_hour")
+      conf.set(TableInputFormat.SCAN_COLUMNS, "cf1:ct")
       conf.set(TableInputFormat.SCAN, scan)
       val hbaseRdd = sc.newAPIHadoopRDD(conf,
         classOf[TableInputFormat], classOf[org.apache.hadoop.hbase.io.ImmutableBytesWritable],
         classOf[org.apache.hadoop.hbase.client.Result])
 
-      if (!hbaseRdd.isEmpty()) {
-        val startups = hbaseRdd.values.map {
-          r =>
-            val count = Bytes.toString(r.getRow)
-            count.toInt
-        }.reduce(_ + _)
-        startups
-      }
-      0
+      val startups = hbaseRdd.values.map {
+        r =>
+          val count = Bytes.toString(r.getValue(Bytes.toBytes("cf1"), Bytes.toBytes("ct")))
+          count.toInt
+      }.reduce(_ + _)
+      startups
+
     }
 
     val userCount = {
-      val scan={
-        var scan = new Scan()
-        scan.setFilter(new PrefixFilter(Bytes.toBytes(hour.split(" ")(0))))
-        val proto = ProtobufUtil.toScan(scan)
+      val scan = {
+        var scani = new Scan()
+
+        scani.setFilter(new PrefixFilter(Bytes.toBytes(hour.split(" ")(0))))
+        val proto = ProtobufUtil.toScan(scani)
         Base64.encodeBytes(proto.toByteArray)
       }
       val conf = Utils.hbaseConf

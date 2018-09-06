@@ -30,7 +30,7 @@ object TimeCompute {
 
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("time-compute")
-//      .setMaster("local[2]")
+      .setMaster("local[2]")
     val ssc = new StreamingContext(conf, Seconds(Config.timeInterval.toInt))
     val kafkaParams = Map(
       "zookeeper.connect" -> Config.zkQuorum,
@@ -45,10 +45,10 @@ object TimeCompute {
     directKafkaStream.foreachRDD(rdd => {
       if (!rdd.isEmpty()) {
         val time = Utils.getHour()
-        RegisterJob.execute(rdd, time)
-        UserStartupJob.execute(rdd, time)
-        StartupsJob.execute(rdd, time)
-        AvgTimeLengthJob.execute(rdd, time)
+//        RegisterJob.execute(rdd, time)
+//        UserStartupJob.execute(rdd, time)
+//        StartupsJob.execute(rdd, time)
+//        AvgTimeLengthJob.execute(rdd, time)
         DayUserAvgStartupsJob.execute(ssc.sparkContext, time)
         km.updateZKOffsets(rdd)
       }
