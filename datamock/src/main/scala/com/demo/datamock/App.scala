@@ -2,7 +2,7 @@ package com.demo.datamock
 
 import java.io.{File, FileWriter}
 import java.text.SimpleDateFormat
-import java.util.{Date, UUID}
+import java.util.{Calendar, Date, UUID}
 
 import scala.util.Random
 
@@ -23,9 +23,9 @@ object App {
 
     for (i <- 1 to Int.MaxValue) {
       var count = 0
-//      val path = "/home/datamock/wechat/%s.COMPLETED".format(i)
-            val path = "C:\\github\\sparkdemo\\datamock\\%s.COMPLETED".format(i)
-//      val out = new FileWriter(path, true)
+      val path = "/home/datamock/wechat/%s.COMPLETED".format(i)
+      //      val path = "C:\\github\\sparkdemo\\datamock\\%s.COMPLETED".format(i)
+      //      val out = new FileWriter(path, true)
       import java.io.FileOutputStream
       import java.io.OutputStreamWriter
       val out = new OutputStreamWriter(new FileOutputStream(path), "UTF-8")
@@ -50,8 +50,15 @@ object App {
               if (count == 250) event = "error"
             }
 
+            var time = nowdate()
+            if (event == "exit") {
+              val cal = Calendar.getInstance()
+              cal.add(Calendar.MINUTE, rd.nextInt(20) + 1)
+              time = dateFormat.format(cal.getTime)
+            }
+
             val value = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
-              .format(nowdate, openId, traceId, pageurl, pageurl, staytime, city.split(",")(0), city.split(",")(1), event, de, os)
+              .format(time, openId, traceId, pageurl, pageurl, staytime, city.split(",")(0), city.split(",")(1), event, de, os)
             out.write(value + System.getProperty("line.separator"))
             i += 1
           }

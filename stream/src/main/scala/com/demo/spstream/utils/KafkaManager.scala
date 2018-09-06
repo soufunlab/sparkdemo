@@ -1,6 +1,6 @@
 package com.demo.spstream.utils
 
-import com.demo.spstream.KafkaCluster.LeaderOffset
+import com.demo.spstream.utils.KafkaCluster.LeaderOffset
 import kafka.common.TopicAndPartition
 import kafka.message.MessageAndMetadata
 import kafka.serializer.Decoder

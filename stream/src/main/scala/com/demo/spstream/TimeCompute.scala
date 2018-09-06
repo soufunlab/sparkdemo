@@ -45,9 +45,11 @@ object TimeCompute {
     directKafkaStream.foreachRDD(rdd => {
       if (!rdd.isEmpty()) {
         val time = Utils.getHour()
-        //        RegisterJob.execute(rdd, time)
-        //        UserStartupJob.execute(rdd, time)
+        RegisterJob.execute(rdd, time)
+        UserStartupJob.execute(rdd, time)
+        StartupsJob.execute(rdd, time)
         AvgTimeLengthJob.execute(rdd, time)
+        DayUserAvgStartupsJob.execute(ssc.sparkContext, time)
         km.updateZKOffsets(rdd)
       }
     })

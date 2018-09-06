@@ -16,7 +16,7 @@ import org.apache.spark.rdd.RDD
   *
   * @version 1.0 2018-9-5 11:18 by 李浩（lihao@cloud-young.com）创建
   */
-object StartupsJob {
+object DayUserAvgStartupsJob {
   def execute(sc: SparkContext, hour: String): Unit = {
     val allStartupCount = {
       val conf = Utils.hbaseConf
@@ -24,20 +24,19 @@ object StartupsJob {
       conf.set(TableInputFormat.SCAN_ROW_START, hour.split(" ")(0))
       conf.set(TableInputFormat.SCAN_ROW_STOP, hour.split(" ")(0))
       conf.set(TableInputFormat.SCAN_COLUMNS, "cf1:ct")
-      val hbaseRdd = sc.newAPIHadoopRDD(Utils.hbaseConf,
+      val hbaseRdd = sc.newAPIHadoopRDD(conf,
         classOf[TableInputFormat], classOf[org.apache.hadoop.hbase.io.ImmutableBytesWritable],
         classOf[org.apache.hadoop.hbase.client.Result])
 
-      val startups = hbaseRdd.values.map {
-        r =>
-          val count = Bytes.toString(r.getRow)
-          try {
+      if (!hbaseRdd.isEmpty()) {
+        val startups = hbaseRdd.values.map {
+          r =>
+            val count = Bytes.toString(r.getRow)
             count.toInt
-          } catch {
-            case Exception => 0
-          }
-      }.reduce(_ + _)
-      startups
+        }.reduce(_ + _)
+        startups
+      }
+      0
     }
 
     val userCount = {
@@ -45,8 +44,8 @@ object StartupsJob {
       conf.set(TableInputFormat.INPUT_TABLE, "compute:newuser_day")
       conf.set(TableInputFormat.SCAN_ROW_START, hour.split(" ")(0))
       conf.set(TableInputFormat.SCAN_ROW_STOP, hour.split(" ")(0))
-      conf.set(TableInputFormat.SCAN_COLUMNS, "cf1:p")
-      val hbaseRdd = sc.newAPIHadoopRDD(Utils.hbaseConf,
+//      conf.set(TableInputFormat.SCAN_COLUMNS, "cf1:p")
+      val hbaseRdd = sc.newAPIHadoopRDD(conf,
         classOf[TableInputFormat], classOf[org.apache.hadoop.hbase.io.ImmutableBytesWritable],
         classOf[org.apache.hadoop.hbase.client.Result])
 
@@ -54,7 +53,7 @@ object StartupsJob {
     }
 
     val avgUserStartups = allStartupCount / userCount
-    val mean = Utils.hbaseConn.getTable(TableName.valueOf("compute:useravg4_startups_day"))
+    val mean = Utils.hbaseConn.getTable(TableName.valueOf("compute:useravg_startups_day"))
     val put = new Put(Bytes.toBytes(hour.split(" ")(0)))
     put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("tl"), Bytes.toBytes(avgUserStartups.toString))
     mean.put(put)

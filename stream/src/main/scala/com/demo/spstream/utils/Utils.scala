@@ -3,7 +3,6 @@ package com.demo.spstream.utils
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
-import Config
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.ConnectionFactory
 import org.apache.hadoop.hbase.mapred.TableOutputFormat
