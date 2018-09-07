@@ -1,6 +1,6 @@
 package com.demo.compute.jobs
 
-import java.util.Date
+import java.util.{Calendar, Date}
 
 import com.demo.compute.coms.Utils
 import org.apache.hadoop.hbase.TableName
@@ -25,37 +25,44 @@ object UvWeek {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
 
-    val days = Utils.weekdays(this.date)
-    val days1 = Utils.monthdays(this.date)
-    //    val conf = new SparkConf().setAppName("uv-week")
-    //      .setMaster("local")
-    //    val sc = new SparkContext(conf)
-    //
-    //    val scan = {
-    //      var scani = new Scan()
-    //      scani.setFilter(new PrefixFilter(Bytes.toBytes(Utils.hbaseDay(this.date))))
-    //      val proto = ProtobufUtil.toScan(scani)
-    //      Base64.encodeBytes(proto.toByteArray)
-    //    }
-    //    val hconf = Utils.hbaseConf
-    //    hconf.set(TableInputFormat.INPUT_TABLE, "compute:newuser_day")
-    //    hconf.set(TableInputFormat.SCAN_COLUMNS, "cf1:ct")
-    //    hconf.set(TableInputFormat.SCAN, scan)
-    //
-    //    val hbaseRdd = sc.newAPIHadoopRDD(hconf,
-    //      classOf[TableInputFormat], classOf[org.apache.hadoop.hbase.io.ImmutableBytesWritable],
-    //      classOf[org.apache.hadoop.hbase.client.Result])
-    //
-    //    val dayUv = hbaseRdd.count()
-    //
-    //    val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:uv_day"))
-    //    try {
-    //      val put = new Put(Bytes.toBytes(Utils.hbaseDay(this.date)))
-    //      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(dayUv))
-    //      table.put(put)
-    //    } finally {
-    //      table.close()
-    //    }
+    val conf = new SparkConf().setAppName("uv-week")
+      .setMaster("local")
+    val sc = new SparkContext(conf)
+
+    val dates = Utils.weekdays(this.date)
+    var (start: String, end: String) = {
+      start = Utils.hbaseDay(dates(0))
+      var cl = Calendar.getInstance()
+      cl.setTime(end)
+      cl.add(Calendar.DATE, 1)
+      end = Utils.hbaseDay(cl.getTime)
+      (start, end)
+    }
+
+    val scan = {
+      var scani = new Scan(Bytes.toBytes(start), Bytes.toBytes(end))
+      val proto = ProtobufUtil.toScan(scani)
+      Base64.encodeBytes(proto.toByteArray)
+    }
+    val hconf = Utils.hbaseConf
+    hconf.set(TableInputFormat.INPUT_TABLE, "compute:newuser_day")
+    hconf.set(TableInputFormat.SCAN_COLUMNS, "cf1:ct")
+    hconf.set(TableInputFormat.SCAN, scan)
+
+    val hbaseRdd = sc.newAPIHadoopRDD(hconf,
+      classOf[TableInputFormat], classOf[org.apache.hadoop.hbase.io.ImmutableBytesWritable],
+      classOf[org.apache.hadoop.hbase.client.Result])
+
+    val weekUv = hbaseRdd.count()
+
+    val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:week_day"))
+    try {
+      val put = new Put(Bytes.toBytes(start))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(weekUv))
+      table.put(put)
+    } finally {
+      table.close()
+    }
 
   }
 
