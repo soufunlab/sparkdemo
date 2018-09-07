@@ -5,7 +5,6 @@ import java.util.{Calendar, Date}
 import com.demo.compute.coms.Utils
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.{Put, Scan}
-import org.apache.hadoop.hbase.filter.PrefixFilter
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
 import org.apache.hadoop.hbase.util.{Base64, Bytes}
@@ -25,11 +24,11 @@ object UvWeek {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
 
-    val conf = new SparkConf().setAppName("uv-week")
+    val conf = new SparkConf().setAppName("uv-month")
       .setMaster("local")
     val sc = new SparkContext(conf)
 
-    val dates = Utils.weekdays(this.date)
+    val dates = Utils.monthdays(this.date)
     var (start: String, end: String) = {
       start = Utils.hbaseDay(dates(0))
       var cl = Calendar.getInstance()
@@ -55,7 +54,7 @@ object UvWeek {
 
     val weekUv = hbaseRdd.count()
 
-    val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:uv_week"))
+    val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:uv_month"))
     try {
       val put = new Put(Bytes.toBytes(start))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(weekUv))
