@@ -30,7 +30,7 @@ object AvgTimeLengthJob {
   }
 
   def putAvgTimeHour(jrdd: RDD[(String, (String, String))], hour: String) = {
-    var hours = hour.replace(" ", "")
+//    var hours = hour.replace(" ", "")
     val allTraceCount = jrdd.count
     val timeLength = jrdd.values.mapPartitions(it => {
       val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -59,7 +59,7 @@ object AvgTimeLengthJob {
 
     val mean = Utils.hbaseConn.getTable(TableName.valueOf("compute:mean_time_hour"))
     try {
-      val put = new Put(Bytes.toBytes(hours))
+      val put = new Put(Bytes.toBytes(hour))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("tl"), Bytes.toBytes(meanTimeLength.toString))
       mean.put(put)
     } finally {
@@ -68,7 +68,7 @@ object AvgTimeLengthJob {
 
     val avguser = Utils.hbaseConn.getTable(TableName.valueOf("compute:avguser_time_hour"))
     try {
-      val avgput = new Put(Bytes.toBytes(hours))
+      val avgput = new Put(Bytes.toBytes(hour))
       avgput.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("tl"), Bytes.toBytes(avgUserTimeLength.toString))
       avguser.put(avgput)
     } finally {

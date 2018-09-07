@@ -64,10 +64,10 @@ object RegisterJob {
   }
 
   def putNewUserHour(prdd: RDD[Entity], hour: String) = {
-    var hours = hour.replace(" ", "")
+//    var hours = hour.replace(" ", "")
     val count = prdd.count()
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:newuser_hour"))
-    val put = new Put(Bytes.toBytes(hours))
+    val put = new Put(Bytes.toBytes(hour))
     put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(count.toString))
     try {
       table.put(put)

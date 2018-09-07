@@ -58,11 +58,11 @@ object UserStartupJob {
     * @param hour
     */
   def putStartupHour(prdd: RDD[(String, (String, String))], hour: String) = {
-    var hours = hour.replace(" ", "")
+//    var hours = hour.replace(" ", "")
     val count = prdd.map(e => e._1).distinct().count()
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:userstartup_hour"))
     try {
-      val put = new Put(Bytes.toBytes(hours))
+      val put = new Put(Bytes.toBytes(hour))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(count.toString))
       table.put(put)
     } finally {

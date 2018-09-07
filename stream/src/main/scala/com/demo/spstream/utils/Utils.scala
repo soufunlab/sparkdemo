@@ -32,9 +32,9 @@ object Utils {
     hbaseConf
   }
 
-  def getHour() = {
+  def getTime() = {
     val calendar = Calendar.getInstance()
-    var simpleDateFormat = new SimpleDateFormat("yyyyMMdd HH")
+    var simpleDateFormat = new SimpleDateFormat("yyyyMMdd HHmmss")
     val min = calendar.get(Calendar.MINUTE)
     if (min <= 30) {
       simpleDateFormat.format(calendar.getTime)
