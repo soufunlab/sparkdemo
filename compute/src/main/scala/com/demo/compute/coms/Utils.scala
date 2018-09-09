@@ -29,6 +29,7 @@ object Utils {
   val event_error = "error"
 
   val dfsFormart = new SimpleDateFormat("yyyy-M-d")
+  val format = new SimpleDateFormat("yyyyMMdd")
 
   def executeTime(args: Array[String]) = {
     var date: Date = null
@@ -96,8 +97,11 @@ object Utils {
   }
 
   def hbaseDay(time: Date) = {
-    val format = new SimpleDateFormat("yyyyMMdd")
     format.format(time)
+  }
+
+  def hbaseDay2Date(time: String) = {
+    format.parse(time)
   }
 
   def weekdays(time: Date) = {
