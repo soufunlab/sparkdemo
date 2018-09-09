@@ -18,7 +18,7 @@ import org.apache.spark.{SparkConf, SparkContext}
   *
   * @version 1.0 2018-9-7 14:36 by 李浩（lihao@cloud-young.com）创建
   */
-object UvWeek {
+object UvMonth {
   var date: Date = null
 
   def main(args: Array[String]): Unit = {
@@ -30,11 +30,13 @@ object UvWeek {
 
     val dates = Utils.monthdays(this.date)
     var (start: String, end: String) = {
-      start = Utils.hbaseDay(dates(0))
-      var cl = Calendar.getInstance()
-      cl.setTime(end)
-      cl.add(Calendar.DATE, 1)
-      end = Utils.hbaseDay(cl.getTime)
+      val start = Utils.hbaseDay(dates(0))
+      val end = {
+        var cl = Calendar.getInstance()
+        cl.setTime(dates(dates.length - 1))
+        cl.add(Calendar.DATE, 1)
+        Utils.hbaseDay(cl.getTime)
+      }
       (start, end)
     }
 

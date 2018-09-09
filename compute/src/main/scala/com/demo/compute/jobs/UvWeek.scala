@@ -31,11 +31,13 @@ object UvWeek {
 
     val dates = Utils.weekdays(this.date)
     var (start: String, end: String) = {
-      start = Utils.hbaseDay(dates(0))
-      var cl = Calendar.getInstance()
-      cl.setTime(end)
-      cl.add(Calendar.DATE, 1)
-      end = Utils.hbaseDay(cl.getTime)
+      var start = Utils.hbaseDay(dates(0))
+      var end = {
+        var cl = Calendar.getInstance()
+        cl.setTime(dates(dates.length - 1))
+        cl.add(Calendar.DATE, 1)
+        Utils.hbaseDay(cl.getTime)
+      }
       (start, end)
     }
 

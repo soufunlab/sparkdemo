@@ -35,13 +35,13 @@ object Utils {
   def getTime() = {
     val calendar = Calendar.getInstance()
     var simpleDateFormat = new SimpleDateFormat("yyyyMMdd HHmmss")
-    val min = calendar.get(Calendar.MINUTE)
-    if (min <= 30) {
-      simpleDateFormat.format(calendar.getTime)
-    } else {
-      calendar.add(Calendar.HOUR, 1)
-      simpleDateFormat.format(calendar.getTime)
-    }
+    //    val min = calendar.get(Calendar.MINUTE)
+    //    if (min <= 30) {
+    //      simpleDateFormat.format(calendar.getTime)
+    //    } else {
+    //      calendar.add(Calendar.HOUR, 1)
+    simpleDateFormat.format(calendar.getTime)
+    //    }
   }
 
   case class Entity(val time: String, val openid: String, val traceid: String, val sourceurl: String, val pageurl: String, val staytime: String, val province: String, val city: String, val event: String, val device: String, val os: String)

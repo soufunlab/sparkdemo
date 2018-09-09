@@ -42,6 +42,18 @@ object Utils {
     date
   }
 
+  def executeTime(time: String) = {
+    var date: Date = null
+    if (StringUtils.isNotEmpty(time)) {
+      date = dfsFormart.parse(time)
+    } else {
+      val cl = Calendar.getInstance()
+      cl.add(Calendar.DATE, -1)
+      date = cl.getTime
+    }
+    date
+  }
+
   def hadoopConf() = {
     val config = new Configuration()
     config.set("dfs.nameservices", "nameservice1")
