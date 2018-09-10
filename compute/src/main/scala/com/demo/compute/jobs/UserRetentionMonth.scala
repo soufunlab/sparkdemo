@@ -29,29 +29,26 @@ object UserRetentionMonth {
   var startups_table = "compute:userstartup_day"
 
   def main(args: Array[String]): Unit = {
+//    var args = Array("")
+    //    args(0) = "newuser"
     this.switch(args)
     val conf = new SparkConf().setAppName(this.jobName)
       .setMaster("local")
     val sc = new SparkContext(conf)
+    val months = monthList()
 
     val nowUsersRdd = nowRdd(sc, this.thisMonthStartEnd()).keys.map(k => (Bytes.toString(k.get())).split("_")(1)).map(k => (k, 1))
 
-    val months = monthList()
     for (month <- months) {
       val history = historyRdd(sc, month._1).keys.map(k => (Bytes.toString(k.get())).split("_")(1)).map(k => (k, 1))
       val jrdd = nowUsersRdd.join(history)
       val retentionCount = jrdd.count()
       val historyCount = history.count()
-      val rlv = historyCount match {
-        case 0 => -1
-        case _ => retentionCount / historyCount
-      }
       val table = Utils.hbaseConn.getTable(TableName.valueOf(target_table))
       try {
         val put = new Put(Bytes.toBytes(month._2))
-        put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ht"), Bytes.toBytes(historyCount))
-        put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("rt"), Bytes.toBytes(retentionCount))
-        put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("rlv"), Bytes.toBytes(rlv))
+        put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ht"), Bytes.toBytes(historyCount.toString))
+        put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("rt"), Bytes.toBytes(retentionCount.toString))
         table.put(put)
       } finally {
         table.close()
@@ -86,22 +83,23 @@ object UserRetentionMonth {
   }
 
   def switch(args: Array[String]) = {
-    var t = args match {
-      case Array(x, y) =>
-        this.date = Utils.executeTime(y)
-        x
-      case (x) =>
+    var t = {
+      if (args.length == 2) {
+        this.date = Utils.executeTime(args(1))
+        args(0)
+      } else {
         this.date = Utils.executeTime("")
-        x
+        args(0)
+      }
     }
     if (t == "newuser") {
       this.jobName = "newuser_retention_month"
       this.source_table = this.register_table
-      this.target_table = "newuser_retention_month"
+      this.target_table = "compute:newuser_retention_month"
     } else {
       this.jobName = "activeuser_retention_month"
       this.source_table = this.startups_table
-      this.target_table = "activeuser_retention_month"
+      this.target_table = "compute:activeuser_retention_month"
     }
   }
 

@@ -21,6 +21,7 @@
     </dependencies>
 
     <build>
+        <finalName>compute-${compile.name}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -43,7 +44,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.demo.compute.UV</mainClass>
+                            <mainClass>com.demo.compute.jobs.${compile.mainClass}</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -97,4 +98,35 @@
 
     </build>
 
+    <profiles>
+        <profile>
+            <id>compute-uvday</id>
+            <properties>
+                <compile.name>uvday</compile.name>
+                <compile.mainClass>UvDay</compile.mainClass>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>compute-errorday</id>
+            <properties>
+                <compile.name>errorday</compile.name>
+                <compile.mainClass>ErrorDay</compile.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>compute-pvday</id>
+            <properties>
+                <compile.name>pvday</compile.name>
+                <compile.mainClass>PvDay</compile.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>compute-userRetentionDay</id>
+            <properties>
+                <compile.name>user-retention-day</compile.name>
+                <compile.mainClass>UserRetentionDay</compile.mainClass>
+            </properties>
+        </profile>
+    </profiles>
 </project>

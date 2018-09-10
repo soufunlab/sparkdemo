@@ -64,6 +64,8 @@ object Utils {
     config.set("fs.defaultFS", "hdfs://nameservice1")
     config.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER")
     config.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true")
+    config.set("dfs.client.failover.proxy.provider.nameservice1"
+      , "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider")
     config
   }
 
@@ -75,6 +77,8 @@ object Utils {
     conf.set("fs.defaultFS", "hdfs://nameservice1")
     conf.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER")
     conf.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true")
+    conf.set("dfs.client.failover.proxy.provider.nameservice1"
+      , "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider")
   }
 
   def dfs_date(date: Date) = {

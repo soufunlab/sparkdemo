@@ -22,8 +22,8 @@ object PvDay {
 
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
-    val conf = new SparkConf().setAppName("error-day")
-      .setMaster("local")
+    val conf = new SparkConf().setAppName("pv-day")
+//      .setMaster("local")
     val sc = new SparkContext(conf)
 
     Utils.setHadoopConf(sc.hadoopConfiguration)
@@ -34,8 +34,8 @@ object PvDay {
       => LogObj(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
     })
 
-    pageViewCount(hadoopRdd)
-    meanTimeLong(hadoopRdd)
+    pageviewCount(hadoopRdd)
+    meantimeLong(hadoopRdd)
     incount(hadoopRdd)
     outcount(hadoopRdd)
   }
@@ -47,7 +47,7 @@ object PvDay {
       try {
         itr.foreach(i => {
           val put = new Put(Bytes.toBytes(i._1))
-          put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("oct"), Bytes.toBytes(i._2))
+          put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("oct"), Bytes.toBytes(i._2.toString))
           table.put(put)
         })
       } finally {
@@ -63,7 +63,7 @@ object PvDay {
       try {
         itr.foreach(i => {
           val put = new Put(Bytes.toBytes(i._1))
-          put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ict"), Bytes.toBytes(i._2))
+          put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ict"), Bytes.toBytes(i._2.toString))
           table.put(put)
         })
       } finally {
@@ -72,7 +72,7 @@ object PvDay {
     })
   }
 
-  def meanTimeLong(hadoopRdd: RDD[LogObj]) = {
+  def meantimeLong(hadoopRdd: RDD[LogObj]) = {
     hadoopRdd.map(e => (e.pageurl, (e.staytime.toInt, 1)))
       .reduceByKey((a, b) => (a._1 + b._1, a._2 + b._2))
       .mapValues(i => i._1 / i._2)
@@ -81,7 +81,7 @@ object PvDay {
         try {
           itr.foreach(i => {
             val put = new Put(Bytes.toBytes(i._1))
-            put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("mtl"), Bytes.toBytes(i._2))
+            put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("mtl"), Bytes.toBytes(i._2.toString))
             table.put(put)
           })
         } finally {
@@ -91,14 +91,14 @@ object PvDay {
 
   }
 
-  def pageViewCount(hadoopRdd: RDD[LogObj]) = {
+  def pageviewCount(hadoopRdd: RDD[LogObj]) = {
     val countRdd = hadoopRdd.map(e => (e.pageurl, 1)).reduceByKey(_ + _)
     countRdd.foreachPartition(r => {
       val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:pv_day"))
       try {
         r.foreach(i => {
           val put = new Put(Bytes.toBytes(i._1))
-          put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(i._2))
+          put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(i._2.toString))
           table.put(put)
         })
       } finally {

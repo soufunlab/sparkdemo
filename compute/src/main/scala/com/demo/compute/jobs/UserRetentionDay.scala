@@ -35,25 +35,19 @@ object UserRetentionDay {
     val conf = new SparkConf().setAppName(this.jobName)
       .setMaster("local")
     val sc = new SparkContext(conf)
+    val days = daysList()
 
     val nowUsersRdd = nowRdd(sc).keys.map(k => (Bytes.toString(k.get())).split("_")(1)).map(k => (k, 1))
-
-    val days = daysList()
     for (day <- days) {
       val history = historyRdd(sc, day._1).keys.map(k => (Bytes.toString(k.get())).split("_")(1)).map(k => (k, 1))
       val jrdd = nowUsersRdd.join(history)
       val retentionCount = jrdd.count()
       val historyCount = history.count()
-      val rlv = historyCount match {
-        case 0 => -1
-        case _ => retentionCount / historyCount
-      }
       val table = Utils.hbaseConn.getTable(TableName.valueOf(target_table))
       try {
         val put = new Put(Bytes.toBytes(day._2))
-        put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ht"), Bytes.toBytes(historyCount))
-        put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("rt"), Bytes.toBytes(retentionCount))
-        put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("rlv"), Bytes.toBytes(rlv))
+        put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ht"), Bytes.toBytes(historyCount.toString))
+        put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("rt"), Bytes.toBytes(retentionCount.toString))
         table.put(put)
       } finally {
         table.close()
@@ -64,7 +58,6 @@ object UserRetentionDay {
   def historyRdd(sc: SparkContext, date: String) = {
     val scan = {
       var scani = new Scan()
-
       scani.setFilter(new PrefixFilter(Bytes.toBytes(date)))
       val proto = ProtobufUtil.toScan(scani)
       Base64.encodeBytes(proto.toByteArray)
@@ -83,22 +76,23 @@ object UserRetentionDay {
   }
 
   def switch(args: Array[String]) = {
-    var t = args match {
-      case Array(x, y) =>
-        this.date = Utils.executeTime(y)
-        x
-      case (x) =>
+    var t = {
+      if (args.length == 2) {
+        this.date = Utils.executeTime(args(1))
+        args(0)
+      } else {
         this.date = Utils.executeTime("")
-        x
+        args(0)
+      }
     }
     if (t == "newuser") {
       this.jobName = "newuser_retention_day"
       this.source_table = this.register_table
-      this.target_table = "newuser_retention_day"
+      this.target_table = "compute:newuser_retention_day"
     } else {
       this.jobName = "activeuser_retention_day"
       this.source_table = this.startups_table
-      this.target_table = "activeuser_retention_day"
+      this.target_table = "compute:activeuser_retention_day"
     }
   }
 

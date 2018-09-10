@@ -41,8 +41,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-        <!--<maven.scope>provided</maven.scope>-->
-        <maven.scope>compile</maven.scope>
+        <maven.scope>provided</maven.scope>
+        <!--<maven.scope>compile</maven.scope>-->
     </properties>
 
 
@@ -137,4 +137,23 @@
 
     </dependencies>
 
+    <profiles>
+        <profile>
+            <!-- 本地开发环境 -->
+            <id>provided</id>
+            <properties>
+                <maven.scope>provided</maven.scope>
+            </properties>
+        </profile>
+        <profile>
+            <!-- 本地开发环境 -->
+            <id>compile</id>
+            <properties>
+                <maven.scope>compile</maven.scope>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+    </profiles>
 </project>

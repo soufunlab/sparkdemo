@@ -25,7 +25,7 @@ object UvDay {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
     val conf = new SparkConf().setAppName("uv-day")
-      .setMaster("local")
+//      .setMaster("local")
     val sc = new SparkContext(conf)
 
     val scan = {

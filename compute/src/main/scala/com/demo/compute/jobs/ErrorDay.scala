@@ -24,7 +24,7 @@ object ErrorDay {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
     val conf = new SparkConf().setAppName("error-day")
-      .setMaster("local")
+//      .setMaster("local")
     val sc = new SparkContext(conf)
 
     Utils.setHadoopConf(sc.hadoopConfiguration)
@@ -41,7 +41,7 @@ object ErrorDay {
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:error_day"))
     try {
       val put = new Put(Bytes.toBytes(Utils.hbaseDay(this.date)))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(count))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(count.toString))
       table.put(put)
     } finally {
       table.close()

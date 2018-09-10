@@ -37,7 +37,7 @@ object KafkaToHdfs {
     config.set("dfs.ha.namenodes.nameservice1", "namenode46,namenode64")
     config.set("dfs.namenode.rpc-address.nameservice1.namenode46", "master:8020")
     config.set("dfs.namenode.rpc-address.nameservice1.namenode64", "slave1:8020")
-    //    config.set("dfs.client.failover.proxy.provider.nameservice1", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider")
+    config.set("dfs.client.failover.proxy.provider.nameservice1", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider")
     config.set("fs.defaultFS", "hdfs://nameservice1")
     config.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER")
     config.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true")
