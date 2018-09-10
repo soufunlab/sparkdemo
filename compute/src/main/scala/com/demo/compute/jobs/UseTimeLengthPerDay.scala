@@ -23,7 +23,7 @@ object UseTimeLengthPerDay {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
     val conf = new SparkConf().setAppName("useTimeLength-perday")
-      .setMaster("local")
+    //      .setMaster("local")
     val sc = new SparkContext(conf)
 
     Utils.setHadoopConf(sc.hadoopConfiguration)
@@ -50,14 +50,14 @@ object UseTimeLengthPerDay {
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:useTimeLength-perday"))
     try {
       val put = new Put(Bytes.toBytes(Utils.hbaseDay(this.date)))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("0_3"), Bytes.toBytes(deep_0_3))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("4_9"), Bytes.toBytes(deep_4_9))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("10_29"), Bytes.toBytes(deep_10_29))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("30_59"), Bytes.toBytes(deep_30_59))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("1m_3m"), Bytes.toBytes(deep_1m_3m))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("3m_10m"), Bytes.toBytes(deep_3m_10m))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("10m_30m"), Bytes.toBytes(deep_10m_30m))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("30m"), Bytes.toBytes(deep_30m))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("0_3"), Bytes.toBytes(deep_0_3.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("4_9"), Bytes.toBytes(deep_4_9.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("10_29"), Bytes.toBytes(deep_10_29.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("30_59"), Bytes.toBytes(deep_30_59.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("1m_3m"), Bytes.toBytes(deep_1m_3m.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("3m_10m"), Bytes.toBytes(deep_3m_10m.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("10m_30m"), Bytes.toBytes(deep_10m_30m.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("30m"), Bytes.toBytes(deep_30m.toString))
       table.put(put)
     } finally {
       table.close()
@@ -66,7 +66,10 @@ object UseTimeLengthPerDay {
   }
 
   def timeLength_x(rdd: RDD[(Int, Int)], start: Int, end: Int) = {
-    rdd.filter(r => r._1 >= start && r._1 <= end).map(e => e._2).reduce(_ + _)
+    val countRdd = rdd.filter(r => r._1 >= start && r._1 <= end).map(e => e._2)
+    if (!countRdd.isEmpty()) {
+      countRdd.reduce(_ + _)
+    } else 0
   }
 
 

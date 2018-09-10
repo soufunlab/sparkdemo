@@ -23,7 +23,7 @@ object StartupsPerDay {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
     val conf = new SparkConf().setAppName("startups-perday")
-      .setMaster("local")
+//      .setMaster("local")
     val sc = new SparkContext(conf)
 
     Utils.setHadoopConf(sc.hadoopConfiguration)
@@ -48,12 +48,12 @@ object StartupsPerDay {
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:startups-perday"))
     try {
       val put = new Put(Bytes.toBytes(Utils.hbaseDay(this.date)))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("1_2"), Bytes.toBytes(deep_1_2))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("3_5"), Bytes.toBytes(deep_3_5))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("6_9"), Bytes.toBytes(deep_6_9))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("10_19"), Bytes.toBytes(deep_10_19))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("20_49"), Bytes.toBytes(deep_20_49))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("50"), Bytes.toBytes(deep_50))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("1_2"), Bytes.toBytes(deep_1_2.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("3_5"), Bytes.toBytes(deep_3_5.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("6_9"), Bytes.toBytes(deep_6_9.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("10_19"), Bytes.toBytes(deep_10_19.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("20_49"), Bytes.toBytes(deep_20_49.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("50"), Bytes.toBytes(deep_50.toString))
       table.put(put)
     } finally {
       table.close()
@@ -62,7 +62,10 @@ object StartupsPerDay {
   }
 
   def deep_x(rdd: RDD[(Int, Int)], start: Int, end: Int) = {
-    rdd.filter(r => r._1 >= start && r._1 <= end).map(e => e._2).reduce(_ + _)
+    val countRdd = rdd.filter(r => r._1 >= start && r._1 <= end).map(e => e._2)
+    if (!countRdd.isEmpty()) {
+      countRdd.reduce(_ + _)
+    } else 0
   }
 
 

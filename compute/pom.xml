@@ -135,5 +135,19 @@
                 <compile.mainClass>DeepPerDay</compile.mainClass>
             </properties>
         </profile>
+        <profile>
+            <id>compute-startupsperday</id>
+            <properties>
+                <compile.name>startupsperday</compile.name>
+                <compile.mainClass>StartupsPerDay</compile.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>compute-useTimelength-perday</id>
+            <properties>
+                <compile.name>usetimelength-perday</compile.name>
+                <compile.mainClass>UseTimeLengthPerDay</compile.mainClass>
+            </properties>
+        </profile>
     </profiles>
 </project>
