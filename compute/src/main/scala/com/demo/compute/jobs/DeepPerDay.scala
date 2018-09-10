@@ -23,7 +23,7 @@ object DeepPerDay {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
     val conf = new SparkConf().setAppName("deep-perday")
-    //      .setMaster("local")
+    //          .setMaster("local")
     val sc = new SparkContext(conf)
 
     Utils.setHadoopConf(sc.hadoopConfiguration)
@@ -38,11 +38,11 @@ object DeepPerDay {
       .groupByKey().mapValues(itr => itr.toList.distinct)
       .mapValues(itr => itr.count(_ => true)).map(r => (r._2, 1)).reduceByKey(_ + _).persist()
 
-    val deep_1 = deep_x(countRdd, 1, 1)
-    val deep_2 = deep_x(countRdd, 2, 2)
-    val deep_3 = deep_x(countRdd, 3, 3)
-    val deep_4 = deep_x(countRdd, 3, 3)
-    val deep_5 = deep_x(countRdd, 3, 3)
+    val deep_1 = deep_x(countRdd, 1)
+    val deep_2 = deep_x(countRdd, 2)
+    val deep_3 = deep_x(countRdd, 3)
+    val deep_4 = deep_x(countRdd, 4)
+    val deep_5 = deep_x(countRdd, 5)
     val deep_6_10 = deep_x(countRdd, 6, 10)
     val deep_11_50 = deep_x(countRdd, 11, 50)
     val deep_50 = deep_x(countRdd, 50, Int.MaxValue)
@@ -50,14 +50,14 @@ object DeepPerDay {
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:deep_perday"))
     try {
       val put = new Put(Bytes.toBytes(Utils.hbaseDay(this.date)))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("1"), Bytes.toBytes(deep_1))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("2"), Bytes.toBytes(deep_2))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("3"), Bytes.toBytes(deep_3))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("4"), Bytes.toBytes(deep_4))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("5"), Bytes.toBytes(deep_5))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("6_10"), Bytes.toBytes(deep_6_10))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("11_50"), Bytes.toBytes(deep_11_50))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("50"), Bytes.toBytes(deep_50))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("1"), Bytes.toBytes(deep_1.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("2"), Bytes.toBytes(deep_2.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("3"), Bytes.toBytes(deep_3.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("4"), Bytes.toBytes(deep_4.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("5"), Bytes.toBytes(deep_5.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("6_10"), Bytes.toBytes(deep_6_10.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("11_50"), Bytes.toBytes(deep_11_50.toString))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("50"), Bytes.toBytes(deep_50.toString))
       table.put(put)
     } finally {
       table.close()
@@ -65,8 +65,16 @@ object DeepPerDay {
 
   }
 
+
+  def deep_x(rdd: RDD[(Int, Int)], value: Int): Int = {
+    deep_x(rdd, value, value)
+  }
+
   def deep_x(rdd: RDD[(Int, Int)], start: Int, end: Int) = {
-    rdd.filter(r => r._1 >= start && r._1 <= end).map(e => e._2).reduce(_ + _)
+    var crdd = rdd.filter(r => r._1 >= start && r._1 <= end).map(e => e._2)
+    if (!crdd.isEmpty())
+      crdd.reduce(_ + _)
+    else 0
   }
 
 
