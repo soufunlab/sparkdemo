@@ -109,7 +109,7 @@ object UserRetentionWeek {
   def thisWeekStartEnd() = {
     val cal = Calendar.getInstance()
     cal.setTime(this.date)
-    cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+    cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
     val start = Utils.hbaseDay(cal.getTime)
     val end = Utils.hbaseDay(this.date)
     (start, end)
@@ -118,7 +118,7 @@ object UserRetentionWeek {
   def weekList() = {
     var cal = Calendar.getInstance()
     cal.setTime(this.date)
-    cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+    cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
     val result = for (i <- 1 to 9)
       yield {
         cal.add(Calendar.DATE, -7)

@@ -34,7 +34,7 @@ object Utils {
   def executeTime(args: Array[String]) = {
     var date: Date = null
     if (args != null && args.length > 0 && StringUtils.isNotEmpty(args(0))) {
-      date = dfsFormart.parse(args(0))
+      date = format.parse(args(0))
     } else {
       val cl = Calendar.getInstance()
       cl.add(Calendar.DATE, -1)
@@ -46,7 +46,7 @@ object Utils {
   def executeTime(time: String) = {
     var date: Date = null
     if (StringUtils.isNotEmpty(time)) {
-      date = dfsFormart.parse(time)
+      date = format.parse(time)
     } else {
       val cl = Calendar.getInstance()
       cl.add(Calendar.DATE, -1)
@@ -107,7 +107,7 @@ object Utils {
   def weekdays(time: Date) = {
     var cal = Calendar.getInstance()
     cal.setTime(time)
-    cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+    cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
 
     val reL = new ListBuffer[Date]()
     while (cal.getTime.getTime - time.getTime <= 0) {

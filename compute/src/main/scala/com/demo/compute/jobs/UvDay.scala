@@ -35,8 +35,7 @@ object UvDay {
       Base64.encodeBytes(proto.toByteArray)
     }
     val hconf = Utils.hbaseConf
-    hconf.set(TableInputFormat.INPUT_TABLE, "compute:newuser_day")
-    hconf.set(TableInputFormat.SCAN_COLUMNS, "cf1:ct")
+    hconf.set(TableInputFormat.INPUT_TABLE, "compute:userstartup_day")
     hconf.set(TableInputFormat.SCAN, scan)
 
     val hbaseRdd = sc.newAPIHadoopRDD(hconf,
@@ -48,7 +47,7 @@ object UvDay {
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:uv_day"))
     try {
       val put = new Put(Bytes.toBytes(Utils.hbaseDay(this.date)))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(dayUv))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(dayUv.toString))
       table.put(put)
     } finally {
       table.close()

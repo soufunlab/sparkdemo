@@ -47,20 +47,19 @@ object UvWeek {
       Base64.encodeBytes(proto.toByteArray)
     }
     val hconf = Utils.hbaseConf
-    hconf.set(TableInputFormat.INPUT_TABLE, "compute:newuser_day")
-    hconf.set(TableInputFormat.SCAN_COLUMNS, "cf1:ct")
+    hconf.set(TableInputFormat.INPUT_TABLE, "compute:userstartup_day")
     hconf.set(TableInputFormat.SCAN, scan)
 
     val hbaseRdd = sc.newAPIHadoopRDD(hconf,
       classOf[TableInputFormat], classOf[org.apache.hadoop.hbase.io.ImmutableBytesWritable],
       classOf[org.apache.hadoop.hbase.client.Result])
 
-    val weekUv = hbaseRdd.count()
+    val weekUv = hbaseRdd.map(e => (Bytes.toString(e._1.get())).split("_")(1)).distinct().count()
 
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:uv_week"))
     try {
       val put = new Put(Bytes.toBytes(start))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(weekUv))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(weekUv.toString))
       table.put(put)
     } finally {
       table.close()

@@ -36,7 +36,6 @@ object UserRetentionDay {
       .setMaster("local")
     val sc = new SparkContext(conf)
 
-
     val nowUsersRdd = nowRdd(sc).keys.map(k => (Bytes.toString(k.get())).split("_")(1)).map(k => (k, 1))
 
     val days = daysList()
