@@ -46,7 +46,7 @@ object UserRetentionDay {
       val retentionCount = jrdd.count()
       val historyCount = history.count()
       val rlv = historyCount match {
-        case o => -1
+        case 0 => -1
         case _ => retentionCount / historyCount
       }
       val table = Utils.hbaseConn.getTable(TableName.valueOf(target_table))
