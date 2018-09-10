@@ -23,7 +23,7 @@ object DeepPerDay {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
     val conf = new SparkConf().setAppName("deep-perday")
-      .setMaster("local")
+    //      .setMaster("local")
     val sc = new SparkContext(conf)
 
     Utils.setHadoopConf(sc.hadoopConfiguration)
@@ -36,7 +36,7 @@ object DeepPerDay {
 
     val countRdd = hadoopRdd.map(e => (e.traceid, e.pageurl))
       .groupByKey().mapValues(itr => itr.toList.distinct)
-      .mapValues(itr => itr.count(_ => true)).map(r => (r._2, 1)).reduceByKey(_ + _)
+      .mapValues(itr => itr.count(_ => true)).map(r => (r._2, 1)).reduceByKey(_ + _).persist()
 
     val deep_1 = deep_x(countRdd, 1, 1)
     val deep_2 = deep_x(countRdd, 2, 2)

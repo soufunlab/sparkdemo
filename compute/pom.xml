@@ -128,5 +128,12 @@
                 <compile.mainClass>UserRetentionDay</compile.mainClass>
             </properties>
         </profile>
+        <profile>
+            <id>compute-deepperday</id>
+            <properties>
+                <compile.name>deepperday</compile.name>
+                <compile.mainClass>DeepPerDay</compile.mainClass>
+            </properties>
+        </profile>
     </profiles>
 </project>
