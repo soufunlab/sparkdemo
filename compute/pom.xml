@@ -21,7 +21,7 @@
     </dependencies>
 
     <build>
-        <finalName>compute-${compile.name}</finalName>
+        <finalName>cp-${compile.name}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -100,53 +100,95 @@
 
     <profiles>
         <profile>
-            <id>compute-uvday</id>
+            <id>cp-uv-day</id>
             <properties>
-                <compile.name>uvday</compile.name>
+                <compile.name>uv-day</compile.name>
                 <compile.mainClass>UvDay</compile.mainClass>
             </properties>
         </profile>
 
         <profile>
-            <id>compute-errorday</id>
+            <id>cp-error-day</id>
             <properties>
-                <compile.name>errorday</compile.name>
+                <compile.name>error-day</compile.name>
                 <compile.mainClass>ErrorDay</compile.mainClass>
             </properties>
         </profile>
         <profile>
-            <id>compute-pvday</id>
+            <id>cp-pv-day</id>
             <properties>
-                <compile.name>pvday</compile.name>
+                <compile.name>pv-day</compile.name>
                 <compile.mainClass>PvDay</compile.mainClass>
             </properties>
         </profile>
         <profile>
-            <id>compute-userRetentionDay</id>
+            <id>cp-userretention-day</id>
             <properties>
-                <compile.name>user-retention-day</compile.name>
+                <compile.name>userretention-day</compile.name>
                 <compile.mainClass>UserRetentionDay</compile.mainClass>
             </properties>
         </profile>
         <profile>
-            <id>compute-deepperday</id>
+            <id>cp-deep-day</id>
             <properties>
-                <compile.name>deepperday</compile.name>
-                <compile.mainClass>DeepPerDay</compile.mainClass>
+                <compile.name>deep-day</compile.name>
+                <compile.mainClass>DeepDay</compile.mainClass>
             </properties>
         </profile>
         <profile>
-            <id>compute-startupsperday</id>
+            <id>cp-startups-day</id>
             <properties>
-                <compile.name>startupsperday</compile.name>
-                <compile.mainClass>StartupsPerDay</compile.mainClass>
+                <compile.name>startups-day</compile.name>
+                <compile.mainClass>StartupsDay</compile.mainClass>
             </properties>
         </profile>
         <profile>
-            <id>compute-useTimelength-perday</id>
+            <id>cp-usetimelength-day</id>
             <properties>
-                <compile.name>usetimelength-perday</compile.name>
-                <compile.mainClass>UseTimeLengthPerDay</compile.mainClass>
+                <compile.name>usetimelength-day</compile.name>
+                <compile.mainClass>UseTimeLengthDay</compile.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>cp-avgusertime-day</id>
+            <properties>
+                <compile.name>avgusertime-day</compile.name>
+                <compile.mainClass>AvgUserTimeDay</compile.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>cp-meantime-day</id>
+            <properties>
+                <compile.name>meantime-day</compile.name>
+                <compile.mainClass>MeanTimeDay</compile.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>cp-userretention-week</id>
+            <properties>
+                <compile.name>userretention-week</compile.name>
+                <compile.mainClass>UserRetentionWeek</compile.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>cp-userretention-month</id>
+            <properties>
+                <compile.name>userretention-month</compile.name>
+                <compile.mainClass>UserRetentionMonth</compile.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>cp-uv-week</id>
+            <properties>
+                <compile.name>uv-week</compile.name>
+                <compile.mainClass>UvWeek</compile.mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>cp-uv-month</id>
+            <properties>
+                <compile.name>uv-month</compile.name>
+                <compile.mainClass>UvMonth</compile.mainClass>
             </properties>
         </profile>
     </profiles>

@@ -25,7 +25,7 @@ object UvMonth {
     this.date = Utils.executeTime(args)
 
     val conf = new SparkConf().setAppName("uv-month")
-      .setMaster("local")
+//      .setMaster("local")
     val sc = new SparkContext(conf)
 
     val dates = Utils.monthdays(this.date)

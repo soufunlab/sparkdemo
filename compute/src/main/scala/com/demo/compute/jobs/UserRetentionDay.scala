@@ -33,7 +33,7 @@ object UserRetentionDay {
   def main(args: Array[String]): Unit = {
     this.switch(args)
     val conf = new SparkConf().setAppName(this.jobName)
-      .setMaster("local")
+//      .setMaster("local")
     val sc = new SparkContext(conf)
     val days = daysList()
 

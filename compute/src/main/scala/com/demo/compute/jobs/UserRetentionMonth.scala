@@ -33,7 +33,7 @@ object UserRetentionMonth {
     //    args(0) = "newuser"
     this.switch(args)
     val conf = new SparkConf().setAppName(this.jobName)
-      .setMaster("local")
+//      .setMaster("local")
     val sc = new SparkContext(conf)
     val months = monthList()
 

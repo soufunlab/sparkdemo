@@ -17,7 +17,7 @@ import org.apache.spark.{SparkConf, SparkContext}
   *
   * @version 1.0 2018-9-7 14:36 by 李浩（lihao@cloud-young.com）创建
   */
-object DeepPerDay {
+object DeepDay {
   var date: Date = null
 
   def main(args: Array[String]): Unit = {
@@ -47,7 +47,7 @@ object DeepPerDay {
     val deep_11_50 = deep_x(countRdd, 11, 50)
     val deep_50 = deep_x(countRdd, 50, Int.MaxValue)
 
-    val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:deep_perday"))
+    val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:deep_day"))
     try {
       val put = new Put(Bytes.toBytes(Utils.hbaseDay(this.date)))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("1"), Bytes.toBytes(deep_1.toString))

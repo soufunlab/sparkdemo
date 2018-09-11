@@ -17,7 +17,7 @@ import org.apache.spark.{SparkConf, SparkContext}
   *
   * @version 1.0 2018-9-7 14:36 by 李浩（lihao@cloud-young.com）创建
   */
-object UseTimeLengthPerDay {
+object UseTimeLengthDay {
   var date: Date = null
 
   def main(args: Array[String]): Unit = {
@@ -47,7 +47,7 @@ object UseTimeLengthPerDay {
     val deep_10m_30m = timeLength_x(useTimeRdd, 60 * 10, 60 * 30 - 1)
     val deep_30m = timeLength_x(useTimeRdd, 60 * 30, Int.MaxValue)
 
-    val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:useTimeLength-perday"))
+    val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:usetimelength_day"))
     try {
       val put = new Put(Bytes.toBytes(Utils.hbaseDay(this.date)))
       put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("0_3"), Bytes.toBytes(deep_0_3.toString))

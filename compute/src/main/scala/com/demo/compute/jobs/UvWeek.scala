@@ -26,7 +26,7 @@ object UvWeek {
     this.date = Utils.executeTime(args)
 
     val conf = new SparkConf().setAppName("uv-week")
-      .setMaster("local")
+//      .setMaster("local")
     val sc = new SparkContext(conf)
 
     val dates = Utils.weekdays(this.date)

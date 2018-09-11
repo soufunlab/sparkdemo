@@ -22,7 +22,7 @@ object AvgUserTimeDay {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
     val conf = new SparkConf().setAppName("avguser-time-day")
-      .setMaster("local")
+    //      .setMaster("local")
     val sc = new SparkContext(conf)
 
     Utils.setHadoopConf(sc.hadoopConfiguration)
@@ -49,7 +49,7 @@ object AvgUserTimeDay {
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:avguser_time_day"))
     try {
       val put = new Put(Bytes.toBytes(Utils.hbaseDay(this.date)))
-      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(meanTime))
+      put.addColumn(Bytes.toBytes("cf1"), Bytes.toBytes("ct"), Bytes.toBytes(meanTime.toString))
       table.put(put)
     } finally {
       table.close()
