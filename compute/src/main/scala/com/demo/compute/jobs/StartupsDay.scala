@@ -7,6 +7,7 @@ import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 
 
@@ -23,20 +24,33 @@ object StartupsDay {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
     val conf = new SparkConf().setAppName("startups-perday")
-//      .setMaster("local")
+    //      .setMaster("local")
     val sc = new SparkContext(conf)
 
-    Utils.setHadoopConf(sc.hadoopConfiguration)
+    val sqlCtx = new HiveContext(sc)
 
-    val path = s"hdfs://nameservice1/user/root/test/${Utils.dfs_date(date)}/${Utils.dfs_date(date)}.txt"
-    val hadoopRdd = sc.textFile(path).map(i => i.split("\t")).map(i => i match {
-      case Array(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
-      => LogObj(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
-    })
+    import sqlCtx.implicits._
+    import sqlCtx.sql
 
-    val countRdd = hadoopRdd.filter(e => e.event == Utils.event_load)
-      .map(e => (e.openid, 1)).reduceByKey(_ + _)
-      .map(e => (e._2, 1)).reduceByKey(_ + _)
+    val df = sql(
+      s"""
+         |select count(openid) from source_data where date=${date} and event=${Utils.event_load}
+         |group by openid
+      """.stripMargin).as[Int]
+
+    val countRdd = df.rdd.map((_, 1)).reduceByKey(_ + _)
+    //
+    //    Utils.setHadoopConf(sc.hadoopConfiguration)
+    //
+    //    val path = s"hdfs://nameservice1/user/root/test/${Utils.dfs_date(date)}/${Utils.dfs_date(date)}.txt"
+    //    val hadoopRdd = sc.textFile(path).map(i => i.split("\t")).map(i => i match {
+    //      case Array(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
+    //      => LogObj(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
+    //    })
+    //
+    //    val countRdd = hadoopRdd.filter(e => e.event == Utils.event_load)
+    //      .map(e => (e.openid, 1)).reduceByKey(_ + _)
+    //      .map(e => (e._2, 1)).reduceByKey(_ + _)
 
     val deep_1_2 = deep_x(countRdd, 1, 2)
     val deep_3_5 = deep_x(countRdd, 3, 5)

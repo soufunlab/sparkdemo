@@ -8,7 +8,11 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.hive.ql.exec.spark.session.SparkSession
+import org.apache.spark.sql.SQLContext
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.hive.HiveContext
 
 
 /**
@@ -24,20 +28,15 @@ object ErrorDay {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
     val conf = new SparkConf().setAppName("error-day")
-//      .setMaster("local")
+    //      .setMaster("local")
     val sc = new SparkContext(conf)
+    val sqlContext = new HiveContext(sc)
 
-    Utils.setHadoopConf(sc.hadoopConfiguration)
+    import sqlContext.implicits._
+    import sqlContext.sql
 
-    val path = s"hdfs://nameservice1/user/root/test/${Utils.dfs_date(date)}/${Utils.dfs_date(date)}.txt"
-    val hadoopRdd = sc.textFile(path).map(i => i.split("\t")).map(i => i match {
-      case Array(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
-      => LogObj(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
-    })
-
-    val count = hadoopRdd.filter(e => e.event == Utils.event_error)
-      .map(e => e.openid).distinct().count()
-
+    val df = sql(s"select count(distinct(openid)) as count from source_data where date=${date} and event=${Utils.event_error}")
+    val count = df.collect()(0).getAs[Int]("count")
     val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:error_day"))
     try {
       val put = new Put(Bytes.toBytes(Utils.hbaseDay(this.date)))

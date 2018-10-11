@@ -7,6 +7,7 @@ import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 
 
@@ -25,18 +26,26 @@ object UseTimeLengthDay {
     val conf = new SparkConf().setAppName("useTimeLength-perday")
     //      .setMaster("local")
     val sc = new SparkContext(conf)
+    val sqlCtx = new HiveContext(sc)
+    import sqlCtx.implicits._
+    import sqlCtx.sql
 
-    Utils.setHadoopConf(sc.hadoopConfiguration)
+    val df = sql(
+      s"""
+         |select sum(staytime) from source_data where date=${date}
+         |group by openid
+      """.stripMargin).as[Int]
+    //    Utils.setHadoopConf(sc.hadoopConfiguration)
+    //
+    //    val path = s"hdfs://nameservice1/user/root/test/${Utils.dfs_date(date)}/${Utils.dfs_date(date)}.txt"
+    //    val hadoopRdd = sc.textFile(path).map(i => i.split("\t")).map(i => i match {
+    //      case Array(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
+    //      => LogObj(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
+    //    })
 
-    val path = s"hdfs://nameservice1/user/root/test/${Utils.dfs_date(date)}/${Utils.dfs_date(date)}.txt"
-    val hadoopRdd = sc.textFile(path).map(i => i.split("\t")).map(i => i match {
-      case Array(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
-      => LogObj(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
-    })
-
-    val useTimeRdd = hadoopRdd.map(e => (e.openid, e.staytime.toInt))
-      .reduceByKey(_ + _).map(e => (e._2, 1))
-
+    //    val useTimeRdd = hadoopRdd.map(e => (e.openid, e.staytime.toInt))
+    //      .reduceByKey(_ + _).map(e => (e._2, 1))
+    val useTimeRdd = df.rdd.map(i => (i, 1))
 
     val deep_0_3 = timeLength_x(useTimeRdd, 0, 3)
     val deep_4_9 = timeLength_x(useTimeRdd, 4, 9)

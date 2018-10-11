@@ -7,6 +7,7 @@ import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 
 
@@ -25,18 +26,18 @@ object DeepDay {
     val conf = new SparkConf().setAppName("deep-perday")
     //          .setMaster("local")
     val sc = new SparkContext(conf)
+    val sqlCtx = new HiveContext(sc)
 
-    Utils.setHadoopConf(sc.hadoopConfiguration)
+    import sqlCtx.implicits._
+    import sqlCtx.sql
 
-    val path = s"hdfs://nameservice1/user/root/test/${Utils.dfs_date(date)}/${Utils.dfs_date(date)}.txt"
-    val hadoopRdd = sc.textFile(path).map(i => i.split("\t")).map(i => i match {
-      case Array(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
-      => LogObj(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
-    })
+    val df = sql(
+      s"""
+         |select count(distinct(pageurl)) from source_data where date=${date}
+         |group by traceid
+      """.stripMargin).as[Long]
 
-    val countRdd = hadoopRdd.map(e => (e.traceid, e.pageurl))
-      .groupByKey().mapValues(itr => itr.toList.distinct)
-      .mapValues(itr => itr.count(_ => true)).map(r => (r._2, 1)).reduceByKey(_ + _).persist()
+    val countRdd = df.rdd.map(r => (r, 1)).reduceByKey(_ + _).persist()
 
     val deep_1 = deep_x(countRdd, 1)
     val deep_2 = deep_x(countRdd, 2)
@@ -66,11 +67,11 @@ object DeepDay {
   }
 
 
-  def deep_x(rdd: RDD[(Int, Int)], value: Int): Int = {
+  def deep_x(rdd: RDD[(Long, Int)], value: Int): Int = {
     deep_x(rdd, value, value)
   }
 
-  def deep_x(rdd: RDD[(Int, Int)], start: Int, end: Int) = {
+  def deep_x(rdd: RDD[(Long, Int)], start: Int, end: Int) = {
     var crdd = rdd.filter(r => r._1 >= start && r._1 <= end).map(e => e._2)
     if (!crdd.isEmpty())
       crdd.reduce(_ + _)

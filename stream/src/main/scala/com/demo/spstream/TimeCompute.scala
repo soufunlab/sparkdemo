@@ -42,6 +42,7 @@ object TimeCompute {
     val km = new KafkaManager(kafkaParams)
 
     val directKafkaStream = km.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, topics)
+    
     directKafkaStream.foreachRDD(rdd => {
       if (!rdd.isEmpty()) {
         val time = Utils.getTime()

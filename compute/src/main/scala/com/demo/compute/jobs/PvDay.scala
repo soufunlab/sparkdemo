@@ -7,6 +7,7 @@ import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 
 
@@ -23,21 +24,29 @@ object PvDay {
   def main(args: Array[String]): Unit = {
     this.date = Utils.executeTime(args)
     val conf = new SparkConf().setAppName("pv-day")
-//      .setMaster("local")
+    //      .setMaster("local")
     val sc = new SparkContext(conf)
+    val sqlCtx = new HiveContext(sc)
+    import sqlCtx.implicits._
+    import sqlCtx.sql
 
-    Utils.setHadoopConf(sc.hadoopConfiguration)
+    val df =sql(
+      s"""
+        |select * from source_data where date=${date}
+      """.stripMargin).as[LogObj]
 
-    val path = s"hdfs://nameservice1/user/root/test/${Utils.dfs_date(date)}/${Utils.dfs_date(date)}.txt"
-    val hadoopRdd = sc.textFile(path).map(i => i.split("\t")).map(i => i match {
-      case Array(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
-      => LogObj(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
-    })
+    //    Utils.setHadoopConf(sc.hadoopConfiguration)
+    //
+    //    val path = s"hdfs://nameservice1/user/root/test/${Utils.dfs_date(date)}/${Utils.dfs_date(date)}.txt"
+    //    val hadoopRdd = sc.textFile(path).map(i => i.split("\t")).map(i => i match {
+    //      case Array(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
+    //      => LogObj(time, openid, traceid, sourceurl, pageurl, staytime, province, city, event, device, os)
+    //    })
 
-    pageviewCount(hadoopRdd)
-    meantimeLong(hadoopRdd)
-    incount(hadoopRdd)
-    outcount(hadoopRdd)
+    pageviewCount(df.rdd)
+    meantimeLong(df.rdd)
+    incount(df.rdd)
+    outcount(df.rdd)
   }
 
   def outcount(hadoopRdd: RDD[LogObj]) = {
