@@ -102,6 +102,7 @@ object PvDay {
 
   def pageviewCount(hadoopRdd: RDD[LogObj]) = {
     val countRdd = hadoopRdd.map(e => (e.pageurl, 1)).reduceByKey(_ + _)
+
     countRdd.foreachPartition(r => {
       val table = Utils.hbaseConn.getTable(TableName.valueOf("compute:pv_day"))
       try {

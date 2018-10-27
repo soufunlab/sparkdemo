@@ -1,7 +1,8 @@
 package com.demo.compute.coms
 
+import java.sql.DriverManager
 import java.text.SimpleDateFormat
-import java.util.{Calendar, Date}
+import java.util.{Calendar, Date, Properties}
 
 import com.demo.compute.jobs.MeanTimeDay.date
 import org.apache.commons.lang3.StringUtils
@@ -133,4 +134,14 @@ object Utils {
     }
     reL
   }
+
+  object Jdbc {
+    val url = ""
+    val properties = new Properties()
+    properties.put("user", "root")
+    properties.put("password", "root")
+
+    val conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/baidusong?user=root&password=root&useUnicode=true&characterEncoding=UTF-8")
+  }
+
 }

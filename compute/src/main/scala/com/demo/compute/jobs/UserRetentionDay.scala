@@ -53,6 +53,7 @@ object UserRetentionDay {
         table.close()
       }
     }
+//    nowUsersRdd.coalesce()
   }
 
   def historyRdd(sc: SparkContext, date: String) = {
